@@ -135,11 +135,11 @@ const CourseCard = ({ course }: { course: any }) => {
       
       <CardContent className="p-4 flex-1 flex flex-col justify-between">
         <div className="space-y-3">
-          <h4 className="font-semibold text-lg text-foreground group-hover:text-primary transition-colors line-clamp-2">
+          <h4 className="font-semibold text-lg text-foreground group-hover:text-primary transition-colors line-clamp-2 h-14 flex items-start">
             {course.title}
           </h4>
           
-          <p className="text-sm text-muted-foreground line-clamp-2">
+          <p className="text-sm text-muted-foreground line-clamp-3 h-16 flex items-start">
             {course.description}
           </p>
         </div>
@@ -185,7 +185,7 @@ export const CourseGallery = () => {
                 slidesToScroll: 1,
               }}
             >
-              <CarouselContent className="-ml-4 py-4">
+              <CarouselContent className="-ml-4 py-4 px-4">
                 {category.courses.map((course) => (
                   <CarouselItem key={course.id} className="pl-4 basis-full sm:basis-1/2 lg:basis-1/3 xl:basis-1/4">
                     <CourseCard course={course} />
