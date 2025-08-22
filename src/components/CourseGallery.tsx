@@ -168,8 +168,8 @@ const CourseCard = ({ course }: { course: any }) => {
   };
 
   return (
-    <Card className="group cursor-pointer transition-all duration-300 hover:scale-105 hover:shadow-hover border-border/50 bg-card h-80 lg:h-96 flex flex-col relative">
-      <div className="relative overflow-hidden rounded-t-lg bg-gradient-to-br from-primary/20 to-primary/5 h-40 lg:h-48 flex items-center justify-center">
+    <Card className="group cursor-pointer transition-all duration-300 hover:scale-105 hover:shadow-hover hover:z-50 border-border/50 bg-card h-80 lg:h-96 flex flex-col relative">
+      <div className="relative overflow-hidden rounded-t-lg bg-gradient-to-br from-primary/20 to-primary/5 h-40 lg:h-48 flex items-center justify-center flex-shrink-0">
         <div className="text-primary/60 text-3xl lg:text-6xl font-bold">
           IA
         </div>
@@ -178,13 +178,13 @@ const CourseCard = ({ course }: { course: any }) => {
         </Badge>
       </div>
       
-      <CardContent className="p-3 lg:p-4 flex-1 flex flex-col justify-between">
-        <div className="space-y-2 lg:space-y-3 flex-1">
-          <h4 className="font-semibold text-sm lg:text-lg text-foreground group-hover:text-primary transition-colors line-clamp-2 leading-tight">
+      <CardContent className="p-3 lg:p-4 flex-1 flex flex-col justify-between min-h-0">
+        <div className="space-y-2 lg:space-y-3 flex-1 min-h-0">
+          <h4 className="font-semibold text-sm lg:text-lg text-foreground group-hover:text-primary transition-colors line-clamp-2 leading-tight h-8 lg:h-12 flex items-start overflow-hidden">
             {course.title}
           </h4>
           
-          <p className="text-xs lg:text-sm text-muted-foreground line-clamp-2 lg:line-clamp-3 leading-relaxed flex-1">
+          <p className="text-xs lg:text-sm text-muted-foreground line-clamp-2 lg:line-clamp-3 leading-relaxed flex-1 h-8 lg:h-12 overflow-hidden">
             {course.description}
           </p>
         </div>
@@ -238,8 +238,8 @@ export const CourseGallery = () => {
                 ))}
               </CarouselContent>
               
-              <CarouselPrevious className="left-0 lg:left-2 bg-background/80 hover:bg-background border-border hover:border-primary opacity-50 hover:opacity-100 transition-opacity" />
-              <CarouselNext className="right-0 lg:right-2 bg-background/80 hover:bg-background border-border hover:border-primary opacity-50 hover:opacity-100 transition-opacity" />
+              <CarouselPrevious className="left-0 lg:left-2 bg-background/80 hover:bg-background border-border hover:border-primary opacity-50 hover:opacity-100 transition-opacity z-10" />
+              <CarouselNext className="right-0 lg:right-2 bg-background/80 hover:bg-background border-border hover:border-primary opacity-50 hover:opacity-100 transition-opacity z-10" />
             </Carousel>
           </div>
         </div>
