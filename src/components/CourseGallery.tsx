@@ -168,8 +168,8 @@ const CourseCard = ({ course }: { course: any }) => {
   };
 
   return (
-    <Card className="group cursor-pointer transition-all duration-300 hover:scale-105 hover:shadow-hover border-border/50 bg-card h-72 lg:h-80 flex flex-col relative">
-      <div className="relative overflow-hidden rounded-t-lg bg-gradient-to-br from-primary/20 to-primary/5 h-32 lg:h-48 flex items-center justify-center">
+    <Card className="group cursor-pointer transition-all duration-300 hover:scale-105 hover:shadow-hover border-border/50 bg-card h-80 lg:h-96 flex flex-col relative">
+      <div className="relative overflow-hidden rounded-t-lg bg-gradient-to-br from-primary/20 to-primary/5 h-40 lg:h-48 flex items-center justify-center">
         <div className="text-primary/60 text-3xl lg:text-6xl font-bold">
           IA
         </div>
@@ -178,18 +178,18 @@ const CourseCard = ({ course }: { course: any }) => {
         </Badge>
       </div>
       
-      <CardContent className="p-4 flex-1 flex flex-col justify-between">
-        <div className="space-y-3">
-          <h4 className="font-semibold text-base lg:text-lg text-foreground group-hover:text-primary transition-colors line-clamp-2 h-10 lg:h-14 flex items-start">
+      <CardContent className="p-3 lg:p-4 flex-1 flex flex-col justify-between">
+        <div className="space-y-2 lg:space-y-3 flex-1">
+          <h4 className="font-semibold text-sm lg:text-lg text-foreground group-hover:text-primary transition-colors line-clamp-2 leading-tight">
             {course.title}
           </h4>
           
-          <p className="text-xs lg:text-sm text-muted-foreground line-clamp-3 h-12 lg:h-16 flex items-start">
+          <p className="text-xs lg:text-sm text-muted-foreground line-clamp-2 lg:line-clamp-3 leading-relaxed flex-1">
             {course.description}
           </p>
         </div>
         
-        <div className="flex items-center justify-between text-xs text-muted-foreground pt-2">
+        <div className="flex items-center justify-between text-xs text-muted-foreground pt-3 mt-auto border-t border-border/30">
           <div className="flex items-center gap-1">
             <Clock className="w-3 h-3" />
             <span>{course.duration}</span>
