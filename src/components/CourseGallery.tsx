@@ -168,9 +168,9 @@ const CourseCard = ({ course }: { course: any }) => {
   };
 
   return (
-    <Card className="group cursor-pointer transition-all duration-300 hover:scale-105 hover:shadow-hover hover:z-50 border-border/50 bg-card h-80 lg:h-96 flex flex-col relative">
-      <div className="relative overflow-hidden rounded-t-lg bg-gradient-to-br from-primary/20 to-primary/5 h-40 lg:h-48 flex items-center justify-center flex-shrink-0">
-        <div className="text-primary/60 text-3xl lg:text-6xl font-bold">
+    <Card className="group cursor-pointer transition-all duration-300 hover:scale-105 hover:shadow-hover hover:z-50 border-border/50 bg-card h-80 sm:h-88 lg:h-96 flex flex-col relative">
+      <div className="relative overflow-hidden rounded-t-lg bg-gradient-to-br from-primary/20 to-primary/5 h-32 sm:h-40 lg:h-48 flex items-center justify-center flex-shrink-0">
+        <div className="text-primary/60 text-2xl sm:text-4xl lg:text-6xl font-bold">
           IA
         </div>
         <Badge className={`absolute top-3 left-3 ${getLevelColor(course.level)}`}>
@@ -180,11 +180,11 @@ const CourseCard = ({ course }: { course: any }) => {
       
       <CardContent className="p-3 lg:p-4 flex-1 flex flex-col justify-between min-h-0">
         <div className="space-y-2 lg:space-y-3 flex-1 min-h-0">
-          <h4 className="font-semibold text-sm lg:text-lg text-foreground group-hover:text-primary transition-colors line-clamp-2 leading-tight h-8 lg:h-12 flex items-start overflow-hidden">
+          <h4 className="font-semibold text-sm sm:text-base lg:text-lg text-foreground group-hover:text-primary transition-colors line-clamp-2 leading-tight h-10 sm:h-12 lg:h-14 flex items-start overflow-hidden">
             {course.title}
           </h4>
           
-          <p className="text-xs lg:text-sm text-muted-foreground line-clamp-2 lg:line-clamp-3 leading-relaxed flex-1 h-8 lg:h-12 overflow-hidden">
+          <p className="text-xs sm:text-sm lg:text-sm text-muted-foreground line-clamp-2 sm:line-clamp-3 lg:line-clamp-3 leading-relaxed flex-1 h-10 sm:h-16 lg:h-16 overflow-hidden">
             {course.description}
           </p>
         </div>
@@ -232,7 +232,7 @@ export const CourseGallery = () => {
             >
               <CarouselContent className="-ml-2 lg:-ml-4 py-4 px-2 lg:px-4">
                 {category.courses.map((course) => (
-                  <CarouselItem key={course.id} className="pl-2 lg:pl-4 basis-1/2 sm:basis-1/3 lg:basis-1/4 xl:basis-1/5">
+                  <CarouselItem key={course.id} className="pl-2 lg:pl-4 basis-1/2 sm:basis-1/3 md:basis-1/3 lg:basis-1/4 xl:basis-1/5">
                     <CourseCard course={course} />
                   </CarouselItem>
                 ))}
