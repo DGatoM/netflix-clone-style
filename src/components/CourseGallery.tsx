@@ -14,8 +14,7 @@ const courseCategories = [
         duration: "4h 30min",
         students: 1250,
         rating: 4.8,
-        level: "Iniciante",
-        image: "https://images.unsplash.com/photo-1677442136019-21780ecad995?w=400&h=300&fit=crop"
+        level: "Iniciante"
       },
       {
         id: 2,
@@ -24,8 +23,7 @@ const courseCategories = [
         duration: "6h 15min",
         students: 980,
         rating: 4.9,
-        level: "Intermediário",
-        image: "https://images.unsplash.com/photo-1676299081847-824916de030a?w=400&h=300&fit=crop"
+        level: "Intermediário"
       },
       {
         id: 3,
@@ -34,8 +32,7 @@ const courseCategories = [
         duration: "3h 45min",
         students: 750,
         rating: 4.7,
-        level: "Avançado",
-        image: "https://images.unsplash.com/photo-1675557009339-d3566de5c0e8?w=400&h=300&fit=crop"
+        level: "Avançado"
       },
       {
         id: 4,
@@ -44,8 +41,7 @@ const courseCategories = [
         duration: "5h 20min",
         students: 1100,
         rating: 4.6,
-        level: "Intermediário",
-        image: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=400&h=300&fit=crop"
+        level: "Intermediário"
       }
     ]
   },
@@ -59,8 +55,7 @@ const courseCategories = [
         duration: "4h 10min",
         students: 620,
         rating: 4.5,
-        level: "Intermediário",
-        image: "https://images.unsplash.com/photo-1518186285589-2f7649de83e0?w=400&h=300&fit=crop"
+        level: "Intermediário"
       },
       {
         id: 6,
@@ -69,8 +64,7 @@ const courseCategories = [
         duration: "7h 30min",
         students: 450,
         rating: 4.8,
-        level: "Avançado",
-        image: "https://images.unsplash.com/photo-1485827404703-89b55fcc595e?w=400&h=300&fit=crop"
+        level: "Avançado"
       },
       {
         id: 7,
@@ -79,8 +73,7 @@ const courseCategories = [
         duration: "5h 45min",
         students: 380,
         rating: 4.7,
-        level: "Intermediário",
-        image: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=400&h=300&fit=crop"
+        level: "Intermediário"
       }
     ]
   },
@@ -94,8 +87,7 @@ const courseCategories = [
         duration: "8h 15min",
         students: 320,
         rating: 4.9,
-        level: "Avançado",
-        image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=300&fit=crop"
+        level: "Avançado"
       },
       {
         id: 9,
@@ -104,8 +96,7 @@ const courseCategories = [
         duration: "10h 30min",
         students: 180,
         rating: 4.8,
-        level: "Especialista",
-        image: "https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=400&h=300&fit=crop"
+        level: "Especialista"
       },
       {
         id: 10,
@@ -114,8 +105,7 @@ const courseCategories = [
         duration: "6h 40min",
         students: 410,
         rating: 4.6,
-        level: "Intermediário",
-        image: "https://images.unsplash.com/photo-1531746790731-6c087fecd65a?w=400&h=300&fit=crop"
+        level: "Intermediário"
       }
     ]
   }
@@ -134,13 +124,10 @@ const CourseCard = ({ course }: { course: any }) => {
 
   return (
     <Card className="group cursor-pointer transition-all duration-300 hover:scale-105 hover:shadow-hover border-border/50 bg-card">
-      <div className="relative overflow-hidden rounded-t-lg">
-        <img
-          src={course.image}
-          alt={course.title}
-          className="w-full h-48 object-cover transition-transform duration-500 group-hover:scale-110"
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-background/80 to-transparent" />
+      <div className="relative overflow-hidden rounded-t-lg bg-gradient-to-br from-primary/20 to-primary/5 h-48 flex items-center justify-center">
+        <div className="text-primary/60 text-6xl font-bold">
+          IA
+        </div>
         <Badge className={`absolute top-3 left-3 ${getLevelColor(course.level)}`}>
           {course.level}
         </Badge>
