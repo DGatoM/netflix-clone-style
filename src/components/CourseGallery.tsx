@@ -232,7 +232,7 @@ export const CourseGallery = () => {
             >
               <CarouselContent className="-ml-2 lg:-ml-4 py-4 px-2 lg:px-4">
                 {category.courses.map((course) => (
-                  <CarouselItem key={course.id} className="pl-2 lg:pl-4 basis-1/2 sm:basis-1/3 md:basis-1/3 lg:basis-1/4 xl:basis-1/5">
+                  <CarouselItem key={course.id} className="pl-2 lg:pl-4 basis-1/2 sm:basis-1/2 lg:basis-1/3 xl:basis-1/4">
                     <CourseCard course={course} />
                   </CarouselItem>
                 ))}
