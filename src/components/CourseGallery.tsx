@@ -184,7 +184,7 @@ const CourseCard = ({ course }: { course: any }) => {
             {course.title}
           </h4>
           
-          <p className="text-xs sm:text-sm lg:text-sm text-muted-foreground line-clamp-3 leading-relaxed flex-1 h-12 sm:h-16 lg:h-16 overflow-hidden mb-3">
+          <p className="text-xs sm:text-sm lg:text-sm text-muted-foreground line-clamp-3 leading-relaxed flex-1 h-16 sm:h-16 lg:h-16 overflow-hidden mb-3">
             {course.description}
           </p>
         </div>
