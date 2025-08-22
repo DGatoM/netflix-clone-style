@@ -123,7 +123,7 @@ const CourseCard = ({ course }: { course: any }) => {
   };
 
   return (
-    <Card className="group cursor-pointer transition-all duration-300 hover:scale-105 hover:shadow-hover border-border/50 bg-card">
+    <Card className="group cursor-pointer transition-all duration-300 hover:scale-105 hover:shadow-hover border-border/50 bg-card h-80 flex flex-col relative">
       <div className="relative overflow-hidden rounded-t-lg bg-gradient-to-br from-primary/20 to-primary/5 h-48 flex items-center justify-center">
         <div className="text-primary/60 text-6xl font-bold">
           IA
@@ -133,16 +133,18 @@ const CourseCard = ({ course }: { course: any }) => {
         </Badge>
       </div>
       
-      <CardContent className="p-4 space-y-3">
-        <h4 className="font-semibold text-lg text-foreground group-hover:text-primary transition-colors">
-          {course.title}
-        </h4>
+      <CardContent className="p-4 flex-1 flex flex-col justify-between">
+        <div className="space-y-3">
+          <h4 className="font-semibold text-lg text-foreground group-hover:text-primary transition-colors line-clamp-2">
+            {course.title}
+          </h4>
+          
+          <p className="text-sm text-muted-foreground line-clamp-2">
+            {course.description}
+          </p>
+        </div>
         
-        <p className="text-sm text-muted-foreground line-clamp-2">
-          {course.description}
-        </p>
-        
-        <div className="flex items-center justify-between text-xs text-muted-foreground">
+        <div className="flex items-center justify-between text-xs text-muted-foreground pt-2">
           <div className="flex items-center gap-1">
             <Clock className="w-3 h-3" />
             <span>{course.duration}</span>
@@ -159,6 +161,9 @@ const CourseCard = ({ course }: { course: any }) => {
           </div>
         </div>
       </CardContent>
+      
+      {/* Hover Effect Border */}
+      <div className="absolute inset-0 border-2 border-transparent group-hover:border-primary/30 rounded-lg transition-all duration-300 pointer-events-none"></div>
     </Card>
   );
 };
@@ -180,7 +185,7 @@ export const CourseGallery = () => {
                 slidesToScroll: 1,
               }}
             >
-              <CarouselContent className="-ml-4">
+              <CarouselContent className="-ml-4 py-4">
                 {category.courses.map((course) => (
                   <CarouselItem key={course.id} className="pl-4 basis-full sm:basis-1/2 lg:basis-1/3 xl:basis-1/4">
                     <CourseCard course={course} />

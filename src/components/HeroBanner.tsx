@@ -49,7 +49,7 @@ export const HeroBanner = () => {
                   <div className="absolute inset-0 bg-gradient-to-r from-background/95 via-background/80 to-background/20"></div>
                   
                   {/* Content */}
-                  <div className="absolute inset-0 flex items-center p-8">
+                  <div className="absolute inset-0 flex items-center px-20 py-8">
                     <div className="max-w-2xl">
                       <h1 className="text-3xl sm:text-4xl font-bold text-foreground mb-4">
                         {slide.title}{" "}
