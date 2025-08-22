@@ -168,7 +168,7 @@ const CourseCard = ({ course }: { course: any }) => {
   };
 
   return (
-    <Card className="group cursor-pointer transition-all duration-300 hover:scale-105 hover:shadow-hover hover:z-50 border-border/50 bg-card h-80 sm:h-88 lg:h-96 flex flex-col relative">
+    <Card className="group cursor-pointer transition-all duration-300 hover:scale-105 hover:shadow-hover hover:z-50 border-border/50 bg-card h-[22rem] sm:h-96 lg:h-[26rem] flex flex-col relative">
       <div className="relative overflow-hidden rounded-t-lg bg-gradient-to-br from-primary/20 to-primary/5 h-32 sm:h-40 lg:h-48 flex items-center justify-center flex-shrink-0">
         <div className="text-primary/60 text-2xl sm:text-4xl lg:text-6xl font-bold">
           IA
@@ -184,7 +184,7 @@ const CourseCard = ({ course }: { course: any }) => {
             {course.title}
           </h4>
           
-          <p className="text-xs sm:text-sm lg:text-sm text-muted-foreground line-clamp-2 sm:line-clamp-3 lg:line-clamp-3 leading-relaxed flex-1 h-10 sm:h-16 lg:h-16 overflow-hidden">
+          <p className="text-xs sm:text-sm lg:text-sm text-muted-foreground line-clamp-3 leading-relaxed flex-1 h-12 sm:h-16 lg:h-16 overflow-hidden mb-3">
             {course.description}
           </p>
         </div>
