@@ -189,20 +189,20 @@ const CourseCard = ({ course }: { course: any }) => {
           </p>
         </div>
         
-        <div className="flex items-center justify-between text-xs text-muted-foreground pt-3 mt-auto border-t border-border/30">
-          <div className="flex items-center gap-1">
+        <div className="grid grid-cols-3 gap-1 text-xs text-muted-foreground pt-3 mt-auto border-t border-border/30">
+          <div className="flex flex-col items-center gap-1">
             <Clock className="w-3 h-3" />
-            <span>{course.duration}</span>
+            <span className="text-center leading-tight">{course.duration}</span>
           </div>
           
-          <div className="flex items-center gap-1">
+          <div className="flex flex-col items-center gap-1">
             <Users className="w-3 h-3" />
-            <span>{course.students.toLocaleString()}</span>
+            <span className="text-center leading-tight">{course.students.toLocaleString()}</span>
           </div>
           
-          <div className="flex items-center gap-1">
+          <div className="flex flex-col items-center gap-1">
             <Star className="w-3 h-3 fill-yellow-400 text-yellow-400" />
-            <span>{course.rating}</span>
+            <span className="text-center leading-tight">{course.rating}</span>
           </div>
         </div>
       </CardContent>
@@ -217,8 +217,8 @@ export const CourseGallery = () => {
   return (
     <div className="space-y-12">
       {courseCategories.map((category, index) => (
-        <div key={index} className="space-y-6">
-          <h2 className="text-2xl font-bold text-foreground">
+        <div key={index} className="space-y-4 lg:space-y-6">
+          <h2 className="text-lg lg:text-xl font-bold text-foreground">
             {category.title}
           </h2>
           
