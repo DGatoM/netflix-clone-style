@@ -1,11 +1,25 @@
-// Update this page (the content is just a fallback if you fail to update the page)
+import { Sidebar } from "@/components/Sidebar";
+import { TopNav } from "@/components/TopNav";
+import { WelcomeSection } from "@/components/WelcomeSection";
+import { HeroCard } from "@/components/HeroCard";
 
 const Index = () => {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background">
-      <div className="text-center">
-        <h1 className="text-4xl font-bold mb-4">Welcome to Your Blank App</h1>
-        <p className="text-xl text-muted-foreground">Start building your amazing project here!</p>
+    <div className="min-h-screen bg-background flex">
+      {/* Sidebar */}
+      <Sidebar />
+      
+      {/* Main Content */}
+      <div className="flex-1 p-6 overflow-auto">
+        <TopNav />
+        
+        <div className="max-w-7xl mx-auto space-y-8">
+          {/* Welcome Section */}
+          <WelcomeSection />
+          
+          {/* Hero Card */}
+          <HeroCard />
+        </div>
       </div>
     </div>
   );
