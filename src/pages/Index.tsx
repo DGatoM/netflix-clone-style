@@ -1,7 +1,7 @@
 import { Sidebar } from "@/components/Sidebar";
 import { TopNav } from "@/components/TopNav";
-import { WelcomeSection } from "@/components/WelcomeSection";
-import { HeroCard } from "@/components/HeroCard";
+import { HeroBanner } from "@/components/HeroBanner";
+import { CourseGallery } from "@/components/CourseGallery";
 
 const Index = () => {
   return (
@@ -14,11 +14,11 @@ const Index = () => {
         <TopNav />
         
         <div className="max-w-7xl mx-auto space-y-8">
-          {/* Welcome Section */}
-          <WelcomeSection />
+          {/* Hero Banner Carousel */}
+          <HeroBanner />
           
-          {/* Hero Card */}
-          <HeroCard />
+          {/* Course Gallery Netflix-style */}
+          <CourseGallery />
         </div>
       </div>
     </div>
