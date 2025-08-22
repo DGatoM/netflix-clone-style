@@ -1,8 +1,16 @@
+import { SidebarTrigger } from "@/components/ui/sidebar";
+import { Menu } from "lucide-react";
+
 export const TopNav = () => {
   return (
-    <div className="flex items-center justify-between mb-6">
+    <div className="flex items-center justify-between mb-4 lg:mb-6">
       <div className="flex items-center gap-4">
-        <h2 className="text-2xl font-semibold text-foreground">Dashboard</h2>
+        {/* Mobile menu trigger */}
+        <SidebarTrigger className="lg:hidden">
+          <Menu className="h-5 w-5" />
+        </SidebarTrigger>
+        
+        <h2 className="text-xl lg:text-2xl font-semibold text-foreground">Dashboard</h2>
       </div>
       
       <div className="flex items-center gap-4">

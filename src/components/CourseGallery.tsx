@@ -168,9 +168,9 @@ const CourseCard = ({ course }: { course: any }) => {
   };
 
   return (
-    <Card className="group cursor-pointer transition-all duration-300 hover:scale-105 hover:shadow-hover border-border/50 bg-card h-80 flex flex-col relative">
-      <div className="relative overflow-hidden rounded-t-lg bg-gradient-to-br from-primary/20 to-primary/5 h-48 flex items-center justify-center">
-        <div className="text-primary/60 text-6xl font-bold">
+    <Card className="group cursor-pointer transition-all duration-300 hover:scale-105 hover:shadow-hover border-border/50 bg-card h-72 lg:h-80 flex flex-col relative">
+      <div className="relative overflow-hidden rounded-t-lg bg-gradient-to-br from-primary/20 to-primary/5 h-32 lg:h-48 flex items-center justify-center">
+        <div className="text-primary/60 text-3xl lg:text-6xl font-bold">
           IA
         </div>
         <Badge className={`absolute top-3 left-3 ${getLevelColor(course.level)}`}>
@@ -180,11 +180,11 @@ const CourseCard = ({ course }: { course: any }) => {
       
       <CardContent className="p-4 flex-1 flex flex-col justify-between">
         <div className="space-y-3">
-          <h4 className="font-semibold text-lg text-foreground group-hover:text-primary transition-colors line-clamp-2 h-14 flex items-start">
+          <h4 className="font-semibold text-base lg:text-lg text-foreground group-hover:text-primary transition-colors line-clamp-2 h-10 lg:h-14 flex items-start">
             {course.title}
           </h4>
           
-          <p className="text-sm text-muted-foreground line-clamp-3 h-16 flex items-start">
+          <p className="text-xs lg:text-sm text-muted-foreground line-clamp-3 h-12 lg:h-16 flex items-start">
             {course.description}
           </p>
         </div>
@@ -230,16 +230,16 @@ export const CourseGallery = () => {
                 slidesToScroll: 1,
               }}
             >
-              <CarouselContent className="-ml-4 py-4 px-4">
+              <CarouselContent className="-ml-2 lg:-ml-4 py-4 px-2 lg:px-4">
                 {category.courses.map((course) => (
-                  <CarouselItem key={course.id} className="pl-4 basis-full sm:basis-1/2 lg:basis-1/3 xl:basis-1/4">
+                  <CarouselItem key={course.id} className="pl-2 lg:pl-4 basis-1/2 sm:basis-1/3 lg:basis-1/4 xl:basis-1/5">
                     <CourseCard course={course} />
                   </CarouselItem>
                 ))}
               </CarouselContent>
               
-              <CarouselPrevious className="left-0 bg-background/80 hover:bg-background border-border hover:border-primary" />
-              <CarouselNext className="right-0 bg-background/80 hover:bg-background border-border hover:border-primary" />
+              <CarouselPrevious className="left-0 lg:left-2 bg-background/80 hover:bg-background border-border hover:border-primary opacity-50 hover:opacity-100 transition-opacity" />
+              <CarouselNext className="right-0 lg:right-2 bg-background/80 hover:bg-background border-border hover:border-primary opacity-50 hover:opacity-100 transition-opacity" />
             </Carousel>
           </div>
         </div>
