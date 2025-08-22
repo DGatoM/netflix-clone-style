@@ -42,6 +42,51 @@ const courseCategories = [
         students: 1100,
         rating: 4.6,
         level: "Intermediário"
+      },
+      {
+        id: 11,
+        title: "Claude e Gemini Avançado",
+        description: "Domine os assistentes de IA mais poderosos do mercado",
+        duration: "3h 20min",
+        students: 850,
+        rating: 4.8,
+        level: "Intermediário"
+      },
+      {
+        id: 12,
+        title: "IA para Análise de Dados",
+        description: "Use inteligência artificial para extrair insights valiosos dos seus dados",
+        duration: "7h 10min",
+        students: 620,
+        rating: 4.7,
+        level: "Avançado"
+      },
+      {
+        id: 13,
+        title: "Midjourney e DALL-E",
+        description: "Criação de imagens profissionais com IA generativa",
+        duration: "4h 40min",
+        students: 1350,
+        rating: 4.9,
+        level: "Iniciante"
+      },
+      {
+        id: 14,
+        title: "IA Conversacional",
+        description: "Desenvolva assistentes virtuais inteligentes e eficazes",
+        duration: "5h 55min",
+        students: 540,
+        rating: 4.6,
+        level: "Intermediário"
+      },
+      {
+        id: 15,
+        title: "Automatização com IA",
+        description: "Transforme processos manuais em fluxos automatizados inteligentes",
+        duration: "6h 30min",
+        students: 780,
+        rating: 4.8,
+        level: "Avançado"
       }
     ]
   },
