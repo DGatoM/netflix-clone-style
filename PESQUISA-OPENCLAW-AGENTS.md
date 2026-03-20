@@ -461,6 +461,190 @@ VPS (Hetzner $5/mês)
 
 ---
 
+## 8. Implementação Pessoal: 3 Abordagens Avaliadas
+
+### Contexto
+Usuário já paga Claude Max ($100-200/mês), já tem VPS na Hostinger, quer assistente pessoal tipo OpenClaw mas usando a assinatura Claude.
+
+### Abordagem A: Claude Web (este app) + Repo GitHub Privado
+
+**Como funciona:**
+- Repo privado no GitHub como "workspace" do assistente
+- CLAUDE.md no repo com contexto pessoal, preferências, rotinas
+- MCP servers (Google Workspace, etc.) conectados
+- Interage pelo app web normalmente
+- "Cron" via GitHub Actions (2000 min/mês grátis)
+
+**Prós:**
+- Zero infraestrutura extra
+- Zero custo extra (já paga Max)
+- Funciona agora, sem setup
+- Interface rica (web, artifacts, arquivos)
+
+**Contras:**
+- Sem persistência de sessão (cada conversa reseta)
+- Cron via GitHub Actions é gambiarra — não roda Claude diretamente, só prepara contexto e notifica
+- Sem push notifications (você precisa abrir o app)
+- Não é proativo — é on-demand
+
+**Veredicto:** Bom como **canal secundário** para sessões complexas e longas (pesquisa, planejamento). Não serve como assistente proativo.
+
+### Abordagem B: VPS (Hostinger) + Claude Code CLI + Interface Web/Telegram ★ RECOMENDADA
+
+**Como funciona:**
+- Claude Code instalado na VPS via `claude login` (usa assinatura Max)
+- tmux mantém sessão persistente
+- Crontab + `claude -p` para tarefas proativas (briefing, email check)
+- Interface via uma das opções:
+  - **[claude-telegram-bot](https://github.com/linuz90/claude-telegram-bot)** — bot Telegram bonito, usa assinatura, botões interativos ★ MAIS RÁPIDO
+  - **[Codeman](https://github.com/Ark0N/Codeman)** — WebUI para gerenciar sessões tmux
+  - **Interface web custom** — mais trabalho, mas 100% personalizada
+- MCP servers para Google Workspace, WhatsApp, etc.
+- Tailscale para rede privada segura
+- ntfy para push notifications
+
+**Setup na Hostinger (passo a passo conceitual):**
+```bash
+# 1. SSH na VPS
+ssh user@sua-vps-hostinger
+
+# 2. Instalar Claude Code
+npm install -g @anthropic-ai/claude-code
+
+# 3. Login (usa assinatura Max)
+claude login
+
+# 4. Instalar tmux + configurar
+apt install tmux
+tmux new-session -d -s claude
+
+# 5. Configurar MCP servers
+claude mcp add google-workspace -- npx @ngs/google-mcp-server
+claude mcp add telegram -- npx @antongsm/mcp-telegram
+
+# 6. Criar CLAUDE.md global
+cat > ~/.claude/CLAUDE.md << 'EOF'
+Você é meu assistente pessoal. Contexto:
+- Meu nome: [nome]
+- Fuso: America/Sao_Paulo
+- Idioma: Português BR
+- Email principal: [email]
+- Prioridades: [suas prioridades]
+EOF
+
+# 7. Setup cron para briefing matinal
+crontab -e
+# 0 7 * * * cd ~/workspace && claude -p "Bom dia! Cheque meu email e calendário, me dê um resumo do dia." --allowedTools "Read" "mcp__google-workspace" > /tmp/briefing.txt && ntfy publish meu-canal "Briefing pronto"
+
+# 8. Setup Telegram bot (opção mais rápida para interface bonita)
+git clone https://github.com/linuz90/claude-telegram-bot
+cd claude-telegram-bot && npm install
+# Configurar .env com token do BotFather
+npm start
+```
+
+**Prós:**
+- ★ Cron nativo — proatividade real
+- ★ Sempre disponível — VPS não dorme
+- ★ Acesso mobile bonito via Telegram
+- ★ Usa assinatura Max (sem custo de API)
+- ★ VPS já paga (custo extra = zero)
+- Push notifications via ntfy
+- Sessão persiste via tmux
+
+**Contras:**
+- Setup inicial leva algumas horas
+- `claude login` pode expirar (precisa renovar periodicamente)
+- Rate limits da assinatura Max se aplicam
+- VPS da Hostinger precisa ter RAM suficiente (Claude Code CLI consome ~200-500MB)
+
+**Custo extra: R$0** (já tem VPS + Max)
+
+**Veredicto:** Melhor relação custo-benefício-esforço. A VPS já existe, a assinatura já existe, o bot Telegram já existe como projeto open source. É só montar.
+
+### Abordagem C: Notebook Local + Remote Control + Scheduled Tasks
+
+**Como funciona:**
+- Claude Code Remote Control no notebook pessoal
+- Scheduled Tasks (feature nova) para tarefas proativas
+- Rotina de energia para minimizar consumo quando ausente
+
+**Rotina de energia recomendada:**
+```
+06:00 - Wake on Schedule (BIOS/Task Scheduler acorda o note)
+06:01 - Claude roda briefing matinal via Scheduled Task
+        ... dia todo: lid closed, monitor off, consumo ~5-15W ...
+00:00 - Hibernate (zero consumo)
+        ... noite: sem consumo, sem desgaste ...
+06:00 - Ciclo repete
+```
+
+**Configurações de energia:**
+- **Windows:** Configurações > Sistema > Energia > "Melhor eficiência energética" + hibernar após 6h de inatividade
+- **macOS:** Power Nap habilitado (mantém rede ativa em sleep, ~1-3W)
+- **Bateria:** Limitar carga a 80% (Lenovo Vantage / ASUS MyASUS / Dell Power Manager) para evitar degradação
+
+**Prós:**
+- Scheduled Tasks é feature oficial e nativa
+- Sem VPS, sem infra externa
+- Ambiente local completo (IDE, arquivos, tudo)
+- Remote Control funciona do celular
+
+**Contras:**
+- Depende do note estar ligado (se hibernar, perde proatividade)
+- 18h/dia de disponibilidade (vs 24h da VPS)
+- Desgaste do hardware a longo prazo (ventoinhas, SSD)
+- Se internet cair em casa, assistente fica offline
+- Mais complexo gerenciar energia que simplesmente ter uma VPS
+
+**Custo extra: R$5-15/mês de energia** (~15W x 18h/dia = 8.1 kWh/mês)
+
+**Veredicto:** Funciona bem como **complemento** (quando quer IDE local + Remote Control), mas inferior à VPS como hub principal.
+
+### ★ Recomendação Final: Abordagem B (VPS) como Hub + A e C como Complementos
+
+```
+┌─────────────────────────────────────────────────┐
+│            ARQUITETURA RECOMENDADA               │
+│                                                  │
+│  ┌──────────────┐     ┌──────────────────────┐  │
+│  │  VPS         │     │  Interfaces          │  │
+│  │  Hostinger   │────▶│  - Telegram (mobile) │  │
+│  │              │     │  - Termius (SSH)      │  │
+│  │  Claude Code │     │  - Codeman (WebUI)   │  │
+│  │  + tmux      │     └──────────────────────┘  │
+│  │  + cron      │                                │
+│  │  + MCP       │     ┌──────────────────────┐  │
+│  │  + ntfy      │────▶│  Automação           │  │
+│  └──────────────┘     │  - Cron briefings    │  │
+│                       │  - Email checks      │  │
+│  ┌──────────────┐     │  - Calendar alerts   │  │
+│  │  Claude Web  │     └──────────────────────┘  │
+│  │  (este app)  │                                │
+│  │              │     ┌──────────────────────┐  │
+│  │  Sessões     │     │  Repo GitHub Privado │  │
+│  │  complexas   │────▶│  - CLAUDE.md         │  │
+│  │  e longas    │     │  - Notas/contexto    │  │
+│  └──────────────┘     │  - Workspace         │  │
+│                       └──────────────────────┘  │
+│  ┌──────────────┐                                │
+│  │  Notebook    │     (Opcional)                 │
+│  │  + Remote    │     Para quando quiser IDE     │
+│  │  Control     │     local ou dev pesado        │
+│  └──────────────┘                                │
+│                                                  │
+│  CUSTO TOTAL: R$0 extra (já paga Max + VPS)     │
+└─────────────────────────────────────────────────┘
+```
+
+**Ordem de implementação:**
+1. **Semana 1:** Setup Claude Code na VPS Hostinger + CLAUDE.md + primeiro cron (briefing matinal)
+2. **Semana 2:** Adicionar Telegram bot + MCP Google Workspace + ntfy
+3. **Semana 3:** Repo GitHub privado como workspace compartilhado
+4. **Quando quiser:** Remote Control no note para sessões de dev
+
+---
+
 ## Fontes
 
 - [Best Local LLMs for RTX 40 Series](https://apxml.com/posts/best-local-llm-rtx-40-gpu)
