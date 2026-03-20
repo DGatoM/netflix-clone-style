@@ -306,19 +306,194 @@ Controles disponíveis: `--allowedTools`, `--max-turns`, `--max-budget-usd`, `--
 - Resolve os problemas de segurança do OpenClaw original
 - GitHub: [ComposioHQ/secure-openclaw](https://github.com/ComposioHQ/secure-openclaw)
 
-### Veredicto
-Claude Code + VPS é viável como assistente pessoal **para uso moderado** (não 24/7 contínuo). Para uso intensivo, os rate limits são o gargalo.
+### Veredicto — Claude Code + VPS é Superior ao OpenClaw para Assistente Pessoal
 
-**Melhores abordagens:**
+Após análise aprofundada, **Claude Code + VPS + Max é a melhor abordagem para assistente pessoal (Jarvis)**. O OpenClaw perde em praticamente todos os critérios relevantes:
 
-1. **Hybrid (recomendado):** Claude Code para tarefas complexas (usa assinatura) + OpenClaw com Groq/Llama para rotinas automatizadas 24/7 (API barata)
-2. **Secure-OpenClaw:** Ponte entre os dois mundos — Claude SDK + messaging + 500 apps
-3. **Claude Code puro:** Com Max 20x ($200/mês) + cron + Telegram bot — funciona para uso pesado mas não contínuo
-4. **Claude Code + Telegram bot (linuz90):** Usa assinatura, sem API. Briefing matinal, personal trainer. Mais simples
+| Critério | Claude Code + VPS | OpenClaw |
+|----------|------------------|----------|
+| **Custo** | $0 extra (já paga Max + VPS) | $200-5.000/mês em API |
+| **Qualidade do modelo** | Claude Opus/Sonnet direto | Roteia pra modelos baratos |
+| **Segurança** | Sandboxing enterprise | Root access, credentials expostas |
+| **Ecossistema** | MCP servers maduros | ClawHub 5.700+ skills (mas imaturo) |
+| **Simplicidade** | `claude -p` + cron | Docker + ClawRouter + SecureClaw + multi-API |
+
+**Onde o OpenClaw ainda leva vantagem (mas contornável):**
+
+| Desvantagem do Claude Code | Solução |
+|---------------------------|---------|
+| Memória reseta entre sessões | CLAUDE.md + arquivos de contexto + `--session-id` |
+| Sem skills prontas pra IoT | MCP servers cobrem 90% dos casos úteis |
+| Rate limits com uso 24/7 | Uso de assistente pessoal (3-5h/dia) raramente bate no limite |
+| Interface CLI | Telegram bot resolve (linuz90) |
+| Single-model (Claude only) | Para assistente pessoal, Claude é suficiente |
+
+**Caso de uso comercial:** Se montar um assistente pessoal para um executivo, a abordagem VPS + Claude Code é ideal — o cliente leva a assinatura Claude Pro/Max de brinde, é seguro, e o setup é replicável.
+
+**Ranking final para assistente pessoal:**
+
+1. **★ Claude Code + VPS + Max** — Melhor custo-benefício, seguro, simples
+2. **Secure-OpenClaw (Composio)** — Ponte entre os dois mundos, se precisar de 500+ apps
+3. **OpenClaw puro** — Só se não quiser construir nada e tiver budget sobrando
 
 ---
 
-## 6. Segurança da API DeepSeek — Análise Detalhada
+## 6. Assistente Pessoal vs Agentes Autônomos — Arquiteturas Diferentes
+
+### A Distinção Fundamental
+
+Nem todo agente de IA é igual. **Assistente pessoal (Jarvis)** e **agentes autônomos (prospectador, gerenciador de Instagram)** têm requisitos completamente diferentes:
+
+| Requisito | Jarvis Pessoal | Agente Autônomo |
+|-----------|---------------|-----------------|
+| Disponibilidade | Quando você precisa (3-5h/dia) | 24/7 contínuo |
+| Qualidade do modelo | Alta (decisões importantes) | Baixa/média (tarefas repetitivas) |
+| Volume de requests | Moderado | Alto (milhares/dia) |
+| Rate limits | Raramente um problema | **Problema crítico** |
+| Descartável? | Não (é seu assistente principal) | Sim (pode criar e destruir) |
+| Raciocínio complexo | Sim (planejamento, redação) | Parcial (scraping é mecânico, redação precisa de LLM) |
+
+### Jarvis Pessoal → VPS + Claude Code + Max ★
+
+**Já documentado na seção 5.** Resumo: Claude Code na VPS com tmux, cron, MCP servers, Telegram bot. Custo extra: R$0 (já paga Max + VPS).
+
+### Agentes Autônomos → VPS + n8n + Claude API (Haiku/Sonnet)
+
+Para agentes que rodam o dia todo (prospectador, gerenciador de redes sociais, monitor de oportunidades), a abordagem muda completamente.
+
+**Por que NÃO usar Claude Code + Max para agentes autônomos:**
+- Rate limits da assinatura Max não aguentam uso contínuo 24/7
+- Agentes descartáveis não precisam de Opus-tier
+- Custo por token (API) é mais previsível e escalável
+
+**Por que NÃO usar OpenClaw:**
+- Custo de $200-5.000/mês em API é absurdo
+- Complexidade desnecessária (Docker + ClawRouter + SecureClaw)
+- Segurança questionável para dados empresariais
+- Você é dev — montar a solução é trivial e custa 100x menos
+
+#### Arquitetura Recomendada: n8n + Claude API
+
+```
+┌─────────────────────────────────────────────────────┐
+│                    VPS (mesma do Jarvis)              │
+│                                                      │
+│  ┌─────────────────────────────────────────────┐    │
+│  │              n8n (self-hosted)                │    │
+│  │                                              │    │
+│  │  Workflow: Prospectador                      │    │
+│  │  ┌────────────────────────────────────────┐  │    │
+│  │  │ 1. Cron: a cada hora                   │  │    │
+│  │  │ 2. Google Maps API → lista empresas    │  │    │
+│  │  │ 3. Para cada empresa:                  │  │    │
+│  │  │    ┌──────────────────────────────┐    │  │    │
+│  │  │    │ Claude API (Haiku $0.25/1M)  │    │  │    │
+│  │  │    │ "Analise este site.          │    │  │    │
+│  │  │    │  Entenda o que fazem.        │    │  │    │
+│  │  │    │  Ache email/formulário."     │    │  │    │
+│  │  │    └──────────────────────────────┘    │  │    │
+│  │  │    ┌──────────────────────────────┐    │  │    │
+│  │  │    │ Claude API (Sonnet $3/1M)    │    │  │    │
+│  │  │    │ "Redija mensagem             │    │  │    │
+│  │  │    │  personalizada oferecendo    │    │  │    │
+│  │  │    │  plataforma de ensino IA."   │    │  │    │
+│  │  │    └──────────────────────────────┘    │  │    │
+│  │  │ 4. Envia email/formulário              │  │    │
+│  │  │ 5. Salva no CRM (API)                  │  │    │
+│  │  │ 6. Cron: checa respostas               │  │    │
+│  │  │    ┌──────────────────────────────┐    │  │    │
+│  │  │    │ Claude API (Haiku)           │    │  │    │
+│  │  │    │ "Essa resposta é positiva?"  │    │  │    │
+│  │  │    └──────────────────────────────┘    │  │    │
+│  │  │ 7. Se sim → move pipeline CRM          │  │    │
+│  │  │ 8. Notifica via ntfy/Telegram          │  │    │
+│  │  └────────────────────────────────────────┘  │    │
+│  │                                              │    │
+│  │  Outros workflows possíveis:                 │    │
+│  │  - Gerenciador de Instagram                  │    │
+│  │  - Monitor de oportunidades                  │    │
+│  │  - Founder bot (valida ideias)               │    │
+│  │  - Atendimento ao cliente                    │    │
+│  └─────────────────────────────────────────────┘    │
+│                                                      │
+│  Custo estimado: $10-30/mês (Haiku pra triagem,     │
+│  Sonnet só pra redação personalizada)                │
+└─────────────────────────────────────────────────────┘
+```
+
+**Custo estimado por agente autônomo:**
+
+| Componente | Custo/mês |
+|------------|-----------|
+| n8n (self-hosted) | $0 (open source) |
+| Claude Haiku API (triagem, 80% das calls) | $3-8 |
+| Claude Sonnet API (redação, 20% das calls) | $5-15 |
+| Google Maps API (se necessário) | $0-10 |
+| **Total por agente** | **$8-33/mês** |
+
+#### Alternativa: Claude Code Headless (para quem quer "manda e ele se vira")
+
+Quando a tarefa exige raciocínio livre e não um workflow pré-definido, Claude Code headless com MCPs é mais adequado:
+
+```bash
+claude -p "Aqui está o contexto da minha empresa: [docs].
+Aqui o CRM: [API]. Aqui o email: [credenciais].
+
+Mapeie empresas do Morumbi com perfil XYZ.
+Para cada uma, ache contato e envie msg personalizada.
+Faça 10/hora. Cheque respostas a cada hora.
+Se positiva, registre no CRM." \
+  --allowedTools "mcp__google-maps__*,mcp__gmail__*,mcp__crm__*,Bash,Read,Write"
+```
+
+**Prós:** Zero setup de workflow. O Claude raciocina, planeja e executa autonomamente.
+**Contras:** Pode "se perder" em tarefas longas. Rate limits do Max podem travar. Menos previsível que n8n.
+
+#### Comparação Final: Agentes Autônomos
+
+| Abordagem | "Se vira sozinho"? | Custo/mês | Confiabilidade | Escalável? |
+|-----------|-------------------|-----------|----------------|------------|
+| **n8n + Claude API** | Não (você monta o fluxo) | $10-30 | Alta (previsível) | Sim |
+| **Claude Code headless** | Sim | $0 (Max) ou $50-100 (API) | Média | Limitada |
+| **OpenClaw** | Sim (em teoria) | $200-5.000 | Baixa (imaturo) | Sim |
+
+**Recomendação:** Para agentes em **produção** (prospectador real, gerenciador de Instagram), use **n8n + Claude API**. Para **experimentos** e tarefas pontuais ("veja o que consegue fazer"), use **Claude Code headless**.
+
+### ★ Conclusão Geral: Duas Arquiteturas na Mesma VPS
+
+```
+┌──────────────────────────────────────────────────────────┐
+│                 SUA VPS (Hostinger)                        │
+│                                                           │
+│  ┌─────────────────────┐  ┌────────────────────────────┐ │
+│  │  JARVIS PESSOAL     │  │  AGENTES AUTÔNOMOS         │ │
+│  │                     │  │                            │ │
+│  │  Claude Code + Max  │  │  n8n + Claude API          │ │
+│  │  tmux + cron        │  │  (Haiku/Sonnet)            │ │
+│  │  Telegram bot       │  │                            │ │
+│  │  MCP servers        │  │  - Prospectador            │ │
+│  │                     │  │  - Instagram manager       │ │
+│  │  Custo: R$0 extra   │  │  - Lead qualifier          │ │
+│  │  (já paga Max+VPS)  │  │  - Monitor oportunidades   │ │
+│  │                     │  │                            │ │
+│  │  Uso: sob demanda   │  │  Custo: R$50-170/mês      │ │
+│  │  (3-5h/dia)         │  │  (por agente, API)        │ │
+│  │                     │  │                            │ │
+│  │  Qualidade: Opus    │  │  Uso: 24/7 contínuo       │ │
+│  │  (melhor possível)  │  │  Qualidade: Haiku/Sonnet  │ │
+│  └─────────────────────┘  └────────────────────────────┘ │
+│                                                           │
+│  OpenClaw: NÃO recomendado para nenhum dos dois casos.   │
+│  - Para Jarvis: Claude Code + Max é superior             │
+│  - Para agentes: n8n + API é mais barato e confiável     │
+│  - OpenClaw só faz sentido para quem não quer construir  │
+│    nada e tem budget alto ($200-5.000/mês)               │
+└──────────────────────────────────────────────────────────┘
+```
+
+---
+
+## 7. Segurança da API DeepSeek — Análise Detalhada
 
 ### RISCOS CONFIRMADOS
 
@@ -415,7 +590,7 @@ Claude Code + VPS é viável como assistente pessoal **para uso moderado** (não
 
 ---
 
-## 7. Caso de Uso "Jarvis para Leigos" — Recomendação Final
+## 8. Caso de Uso "Jarvis para Leigos" — Recomendação Final
 
 ### Stack Recomendado (Seguro + Barato)
 
@@ -461,7 +636,7 @@ VPS (Hetzner $5/mês)
 
 ---
 
-## 8. Implementação Pessoal: 3 Abordagens Avaliadas
+## 9. Implementação Pessoal: 3 Abordagens Avaliadas
 
 ### Contexto
 Usuário já paga Claude Max ($100-200/mês), já tem VPS na Hostinger, quer assistente pessoal tipo OpenClaw mas usando a assinatura Claude.
