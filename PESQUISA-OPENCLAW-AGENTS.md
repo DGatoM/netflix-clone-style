@@ -51,22 +51,34 @@
 | Modelo | Quantização | Performance | Viável? |
 |--------|-------------|-------------|---------|
 | **Phi-4-mini (3.8B)** | Q4_K_M – Q5_K_M | Muito rápido | Excelente |
-| **Llama 3.3 8B** | Q4_K_M | 30-50 tok/s | Sweet spot |
-| **Qwen 3 7B** | Q4_K_M | 30-50 tok/s | Sweet spot |
-| **Mistral Small 3 7B** | Q4_K_M | 30-50 tok/s | Sweet spot |
-| **Gemma 3 12B** | Q4_K_M | Lento (offload parcial) | Possível com tradeoffs |
-| **Qwen3 14B** | Q4_K_M | Lento (offload parcial) | Possível com tradeoffs |
+| **Llama 3.3 8B** | Q4_K_M (~4.9GB) | 30-50 tok/s | Sweet spot |
+| **Qwen 3 7B** | Q4_K_M (~4.5GB) | 30-50 tok/s | Sweet spot (HumanEval 76.0) |
+| **Qwen 2.5 Coder 7B** | Q4_K_M (~4.5GB) | 30-50 tok/s | Bom para código |
+| **Mistral Small 3 7B** | Q4_K_M (~4.5GB) | 30-50 tok/s | Sweet spot |
+| **DeepSeek R1 Distilled 7B** | Q4_K_M | 30-50 tok/s | Reasoning barato |
+| **Gemma 3 12B** | Q4_K_M (~8.7GB) | Lento (offload parcial) | Possível com tradeoffs |
+| **Qwen3 14B** | Q4_K_M (~8.7GB) | Lento (offload parcial) | Possível com tradeoffs |
 | **27B+** | Qualquer | Muito lento | Não prático |
+
+### Modelos que NÃO rodam (confirmado)
+- **Qwen3-Coder 32B:** Precisa ~22-24GB VRAM. Nem com quantização extrema (2-bit = ~10-12GB)
+- **Llama 4 Scout:** 109B total (MoE). Precisa ~54.5GB. Inviável
+- **DeepSeek R1 Distilled 14B:** ~8.7GB arquivo, estoura com KV cache
+- **DeepSeek R1 Distilled 32B:** Precisa 24GB VRAM
 
 ### Resumo
 - **Sweet spot:** Modelos 7-8B em Q4_K_M → 30-50 tokens/segundo
-- **Máximo aceitável:** 12-14B com offload parcial para CPU (lento)
-- **Não roda:** 27B+ (VRAM insuficiente)
+- **Máximo aceitável:** 13B em Q3_K_S (qualidade reduzida) ou 8B em Q5_K_M (qualidade boa)
+- **Não roda:** 14B+ (VRAM insuficiente com KV cache)
 - O notebook de R$14k **não roda** modelos grandes como Qwen3-Coder 32B ou DeepSeek R1 32B localmente
+- **Regra:** Deixar ~1GB livre para KV cache. Modelo de 8GB de arquivo vai dar OOM
 
 ### Dicas de Otimização
 - Usar quantização Q4_K_M (padrão do Ollama)
 - `OLLAMA_NUM_PARALLEL=1 OLLAMA_MAX_LOADED_MODELS=1 ollama serve`
+- Reduzir contexto para 4K (economiza 0.2-0.4GB)
+- Ativar Flash Attention (sem perda de qualidade, economiza VRAM)
+- Usar KV cache quantization Q8_0 (reduz cache pela metade)
 - Mínimo 16GB RAM do sistema para modelos 7-8B
 - Monitorar com `nvidia-smi`
 
@@ -96,26 +108,51 @@
 - RTX 4090 usada: ~$1.200-1.500
 - Total com enclosure: ~$1.400-1.900 (~R$7.980-10.830)
 
+#### eGPU Budget: RTX 3090 usada
+- **RTX 3090 usada:** $700-900 (24GB VRAM, 80-110 tok/s em 8B)
+- **Enclosure TB4 barato:** $150-300 (AOOSTAR AG01 ou similar)
+- **Total:** ~$850-1.200 (~R$4.850-6.840)
+- Roda até 27B confortavelmente
+- **MELHOR CUSTO-BENEFÍCIO para eGPU**
+
+#### Enclosures por faixa de preço
+
+| Enclosure | Conexão | Preço | Nota |
+|-----------|---------|-------|------|
+| **MINISFORUM DEG1** | OCuLink | $99 | Mais barato, só 5-7% perda, requer OCuLink |
+| **AOOSTAR AG01** | TB4/USB4 | $150-250 | Budget, PSU 800W incluso |
+| **ANQUORA ANQ-L336** | TB3/TB4/USB4 | $200-300 | Compacto |
+| **Razer Core X V2** | TB5 | $300-400 | 4-slot GPU |
+| **Sonnet** | TB4/TB5 | $350-500 | PSU 850W |
+
 #### Alternativa: OCuLink
 - 64 Gbps (PCIe Gen4 x4) — mais banda que TB4
+- Só 5-7% perda de performance (vs 10-20% do TB4)
 - Nem todo notebook suporta
 - Galaxy Book Ultra 4: verificar se tem OCuLink/M.2 acessível
+- **MINISFORUM DEG1 por $99** — se tiver OCuLink, é a opção mais barata
+
+#### Performance eGPU vs Desktop para LLM
+- **Para inferência LLM, a perda é quase NULA** — modelo carrega 1x na VRAM, depois o compute é todo no GPU
+- A banda TB4/TB5 só importa no carregamento do modelo (segundos)
+- Tokens in/out são kilobytes, não gigabytes
 
 ### Opção B: Desktop Dedicado (Melhor custo-benefício)
 
-#### Budget ($500-1.000 / R$2.850-5.700)
-- PC usado + RTX 3090 usada (24GB VRAM)
-- Roda modelos até 32B quantizados
-- Melhor custo-benefício absoluto
+#### Budget (~$1.000 / R$5.700)
+- RTX 3090 usada ($700-900) + Ryzen 5 5600 ($80-120) + 32GB DDR4 ($50-70) + PSU 750W ($60-80)
+- **Total:** ~$970-1.290
+- Roda até 27B em Q4_K_M, 8B a 80-110 tok/s
+- **Melhor custo-benefício absoluto**
 
-#### Mid-range ($1.000-2.000 / R$5.700-11.400)
-- PC com RTX 4090 (24GB)
-- Roda 70B com offload parcial
-- Excelente para uso pesado
+#### Mid-range (~$1.500-2.500 / R$8.550-14.250)
+- RTX 4090 ($1.600-1.800) + Ryzen 7 7800X3D ($300) + 48-64GB DDR5 ($120-200)
+- Roda 13B-34B nativamente, 70B com CPU offload (~18 tok/s)
 
 #### Para rodar 70B confortavelmente
-- Mínimo: 2x RTX 3090 (48GB total) ou 1x RTX 5090 (32GB)
-- Custo: $2.000-3.500
+- **2x RTX 3090 (48GB total):** $1.400-1.800 só GPUs + PSU 1000W → ~$2.200-3.000 build completo
+- **1x RTX 5090 (32GB):** $3.400-4.000 só GPU → 70B em quantização agressiva (Q3)
+- **Prático mínimo para 70B aceitável:** ~$1.600 (RTX 3090 + 64GB RAM + CPU offload = ~18 tok/s)
 
 ### Opção C: Não comprar hardware (Cloud/API)
 - Usar API de modelos grandes quando necessário
