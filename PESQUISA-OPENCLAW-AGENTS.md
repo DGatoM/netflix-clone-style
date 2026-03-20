@@ -188,56 +188,133 @@ Usar Claude Code (com assinatura Pro/Max) como assistente pessoal 24/7, similar 
 - Opus 4: 24-40 horas/semana
 - Na prática, depende do tamanho do contexto e complexidade
 
-### Setup Existente: Claude Code como Assistente Pessoal
+### Projetos GitHub que Transformam Claude Code em Assistente Pessoal
 
-#### Plugin Personal Assistant (GitHub: kjenney/personal-assistant-plugin)
-- Transforma Claude Code em assistente pessoal
-- Integração com Gmail e Google Calendar via MCP
-- Features: resumo de emails, respostas contextuais, busca, detecção de prioridade
-- Agendamento, preparação de reuniões, detecção de conflitos
-- Usa MCP servers: `@gongrzhe/server-gmail-autoauth-mcp` e `@cocal/google-calendar-mcp`
+#### Projetos Dedicados
 
-#### MCP Servers Disponíveis para Claude Code
-- **Email:** Gmail MCP, Outlook MCP
-- **Calendário:** Google Calendar MCP
-- **Drive/Arquivos:** Google Drive MCP, filesystem MCP
-- **Web:** Playwright MCP (browser), web search
-- **Messaging:** WhatsApp/Telegram (via bridges)
-- **Lazy loading:** Reduz uso de contexto em até 95%
+| Projeto | O que faz |
+|---------|-----------|
+| [personal-assistant-plugin](https://github.com/kjenney/personal-assistant-plugin) | Plugin com Gmail + Google Calendar via MCP. Resumo de emails, respostas, agendamento |
+| [claude-code-personal-assistant](https://github.com/c0dezli/claude-code-personal-assistant) | Template com Notion + Google Workspace. Comando `/daily-routine` para morning workflow |
+| [personal-assistant (blizzarac)](https://github.com/blizzarac/personal-assistant) | Skills para journal, tasks, meetings, people management. Armazena em markdown estruturado |
+| [claude-telegram-bot](https://github.com/linuz90/claude-telegram-bot) | Bot Telegram com botões interativos, comando `/life-pulse` (briefing matinal), modo personal trainer. **Usa assinatura, sem custo de API** |
+| **[Secure-OpenClaw (Composio)](https://github.com/ComposioHQ/secure-openclaw)** | **PONTE entre Claude Code e OpenClaw.** WhatsApp/Telegram/Signal/iMessage, memória persistente, reminders, 500+ apps. Docker hardening |
 
-#### Setup Recomendado (Claude Code + VPS)
+#### Ferramentas de Gerenciamento de Sessão
+
+| Projeto | O que faz |
+|---------|-----------|
+| [claude-tmux](https://github.com/nielsgroen/claude-tmux) | TUI para gerenciar múltiplas sessões Claude Code no tmux |
+| [Codeman](https://github.com/Ark0N/Codeman) | WebUI para Claude Code no tmux, auto-recovery, detecção de sessões ghost |
+| [awesome-claude-code](https://github.com/hesreallyhim/awesome-claude-code) | Lista curada de skills, hooks, plugins, agent orchestrators |
+| [claude-code-hooks-mastery](https://github.com/disler/claude-code-hooks-mastery) | Padrões de automação com hooks |
+
+#### MCP Servers para Assistente Pessoal
+
+**Google Workspace:**
+
+| Projeto | Serviços | Nota |
+|---------|----------|------|
+| [google-mcp-server (ngs)](https://github.com/ngs/google-mcp-server) | Calendar, Drive, Gmail, Sheets, Docs, Slides | OAuth, `claude mcp add` |
+| [Workspace MCP](https://workspacemcp.com/) | 12 serviços, 100+ ferramentas | CLI dedicado |
+| [google-calendar-mcp (nspady)](https://github.com/nspady/google-calendar-mcp) | Só Calendar | Multi-conta, conflitos, linguagem natural |
+| [Hardened Google Workspace MCP](https://github.com/c0webster/hardened-google-workspace-mcp) | Gmail, Calendar, Docs | Fork focado em segurança |
+
+**Messaging:**
+
+| Projeto | Plataforma | Nota |
+|---------|------------|------|
+| [Plugin oficial Telegram](https://dev.to/czmilo/claude-code-telegram-plugin-complete-setup-guide-2026-3j0p) | Telegram | MCP server oficial, 6 passos |
+| [claude-code-telegram](https://github.com/RichardAtCT/claude-code-telegram) | Telegram | Acesso remoto com sessão persistente |
+| [mcp-telegram (antongsm)](https://github.com/antongsm/mcp-telegram) | Telegram | Envia da SUA conta pessoal via MTProto |
+| [WhatsApp MCP](https://claudelog.com/claude-code-mcps/whatsapp-mcp/) | WhatsApp | Ler/buscar/enviar mensagens |
+| **[Secure-OpenClaw](https://github.com/ComposioHQ/secure-openclaw)** | WhatsApp, Telegram, Signal, iMessage | 500+ apps, memória, reminders |
+
+**Outros:** Playwright MCP (browser), filesystem MCP, web search MCP. Lazy loading reduz contexto em até 95%.
+
+#### Modo Headless (Automação com Cron)
+
+Claude Code tem flag `-p` / `--print` para rodar non-interactively:
+```bash
+# Exemplo: revisão diária de logs às 3h
+0 3 * * * cd /app && claude -p "Review logs from last 24h" --allowedTools "Read" "Bash(curl *)"
+
+# Briefing matinal às 7h
+0 7 * * * claude -p "Check my email and calendar for today" --max-turns 10
 ```
-VPS (Hetzner/Vultr) $5-10/mês
-+ Claude Pro/Max $20-200/mês
-+ tmux (sessão persistente)
-+ mosh (conexão resiliente)
-+ MCP servers (email, calendar, drive)
-+ personal-assistant-plugin
-= Assistente pessoal "always-on"
+
+Controles disponíveis: `--allowedTools`, `--max-turns`, `--max-budget-usd`, `--session-id` (multi-turn).
+
+**Feature request aberto:** [Proactive scheduled hooks](https://github.com/anthropics/claude-code/issues/4785) — cron built-in nos hooks.
+
+#### CLAUDE.md como Memória Persistente
+
+- `~/.claude/CLAUDE.md` (global) > project-level > nested directories
+- Carregado automaticamente a cada sessão
+- Manter < 200 linhas
+- Hooks `SessionStart` podem rodar scripts (ex: injetar data atual, contexto do dia)
+- **Compliance ~70%** (não é determinístico como hooks)
+- Custom slash commands: `.claude/commands/seu-comando.md`
+
+#### Setup Completo Recomendado (Claude Code + VPS)
+```
+1. VPS (Hetzner/Vultr) $5-10/mês
+2. Claude Max 5x ou 20x ($100-200/mês)
+3. tmux (sessão persistente)
+4. mosh (conexão resiliente)
+5. Tailscale (rede privada segura)
+6. MCP servers: Google Workspace, Telegram/WhatsApp, Playwright
+7. CLAUDE.md com contexto pessoal + date scripts
+8. Hooks: SessionStart (briefing), Stop (push notifications via ntfy)
+9. Custom commands: /daily-briefing, /check-email, /schedule-meeting
+10. Cron jobs com `claude -p` para tarefas proativas
+11. Termius (iOS/Android) para acesso mobile
 ```
 
 #### Acesso Mobile
-- Termius ou JuiceSSH no celular
-- Claude Code Remote Control (fev 2026) — controla do celular
-- Mas o processo roda na VPS, não morre
+- **Termius** (iOS/Android) — SSH client principal
+- **Tailscale** — rede privada (sem expor VPS à internet)
+- **Mosh** — conexão resiliente (WiFi instável não mata sessão)
+- **ntfy** — push notifications quando Claude precisa de input
+- Claude Code Remote Control (fev 2026) — mas requer máquina local
 
-### Limitações vs OpenClaw
-| Feature | Claude Code + VPS | OpenClaw |
-|---------|------------------|----------|
+### Comparação Detalhada: Claude Code vs OpenClaw
+
+| Dimensão | Claude Code + VPS | OpenClaw |
+|----------|------------------|----------|
 | Custo base | $20-200/mês (assinatura) | $0 (open source) |
-| Custo API | Incluso na assinatura | $8-30/mês |
-| Interface | Terminal (CLI) | Web GUI |
-| Setup | Mais complexo | Docker simplificado |
+| Custo API | Incluso na assinatura | $8-30/mês (paga por uso) |
+| Interface principal | Terminal / SSH / Telegram bot | WhatsApp/Telegram/Slack/Web |
+| Memória | Reseta entre sessões* | Persistente por semanas |
+| Comportamento proativo | Cron + headless (setup manual) | Heartbeat scheduler built-in |
+| Skills ecosystem | Custom commands + hooks + MCP | ClawHub: 5.700+ skills |
+| Segurança | Sandboxing estrito, enterprise | Riscos (root access, credentials) |
+| Multi-modelo | Claude only | Claude, GPT-4o, DeepSeek, Gemini, Ollama |
+| Smart home / IoT | Não projetado | Skills nativas |
 | Rate limits | SIM (problemático) | Não (paga por uso) |
-| Qualidade do modelo | Claude (top tier) | Multi-modelo |
-| MCP ecosystem | Rico e crescente | Skills/plugins |
-| Always-on | Via VPS + tmux | Nativo |
-| Mobile | Termius/Remote Control | Web/Telegram/WhatsApp |
+
+*Pode usar `--session-id` ou arquivos para persistência parcial
+
+### O Projeto Ponte: Secure-OpenClaw (Composio)
+
+**Este é o mais promissor para unir os dois mundos:**
+- Usa Claude Agent SDK por baixo
+- Roda em WhatsApp/Telegram/Signal/iMessage
+- Memória persistente + scheduled reminders
+- 500+ integrações de apps via Composio
+- Docker hardening + credential isolation
+- Resolve os problemas de segurança do OpenClaw original
+- GitHub: [ComposioHQ/secure-openclaw](https://github.com/ComposioHQ/secure-openclaw)
 
 ### Veredicto
-Claude Code + VPS é viável como assistente pessoal **para uso moderado** (não 24/7 contínuo). Para uso intensivo, os rate limits são o gargalo. A melhor abordagem é **híbrida:**
-- Claude Code para tarefas complexas (usa assinatura)
-- OpenClaw com DeepSeek/Llama para tarefas simples e rotinas automatizadas (usa API barata)
+Claude Code + VPS é viável como assistente pessoal **para uso moderado** (não 24/7 contínuo). Para uso intensivo, os rate limits são o gargalo.
+
+**Melhores abordagens:**
+
+1. **Hybrid (recomendado):** Claude Code para tarefas complexas (usa assinatura) + OpenClaw com Groq/Llama para rotinas automatizadas 24/7 (API barata)
+2. **Secure-OpenClaw:** Ponte entre os dois mundos — Claude SDK + messaging + 500 apps
+3. **Claude Code puro:** Com Max 20x ($200/mês) + cron + Telegram bot — funciona para uso pesado mas não contínuo
+4. **Claude Code + Telegram bot (linuz90):** Usa assinatura, sem API. Briefing matinal, personal trainer. Mais simples
 
 ---
 
@@ -414,3 +491,16 @@ VPS (Hetzner $5/mês)
 - [Best GPUs for Local LLM Inference 2026](https://corelab.tech/llmgpu/)
 - [Used RTX 3090 Best Value for Local AI](https://www.xda-developers.com/used-rtx-3090-still-best-for-local-ai-in-value/)
 - [eGPU Connection Speed Impact on LLM Inference](https://egpu.io/forums/pro-applications/impact-of-egpu-connection-speed-on-local-llm-inference-in-multi-egpu-setups/)
+- [Claude Code Headless Mode](https://code.claude.com/docs/en/headless)
+- [Claude Code Can Work While You Sleep](https://wmedia.es/en/tips/claude-code-headless-mode-autonomous-agent)
+- [Claude Code + Google Workspace MCP](https://wow.pjh.is/journal/claude-code-google-workspace-mcp)
+- [Claude Code Telegram Plugin Setup](https://dev.to/czmilo/claude-code-telegram-plugin-complete-setup-guide-2026-3j0p)
+- [tmux + Tailscale + Termius + Claude Code](https://emreisik.dev/code-from-your-phone-like-a-boss-tmux-tailscale-termius-claude-code-developer-heaven-95119c704f20)
+- [Claude Code Is Not a Coding Tool -- It's a Personal Assistant](https://newsletter.artofsaience.com/p/claude-code-is-not-a-coding-toolits)
+- [How to Turn Claude Code Into Your Personal AI Assistant](https://www.theneuron.ai/explainer-articles/how-to-turn-claude-code-into-your-personal-ai-assistant/)
+- [Claude Code Customization Guide](https://alexop.dev/posts/claude-code-customization-guide-claudemd-skills-subagents/)
+- [Secure-OpenClaw (Composio)](https://github.com/ComposioHQ/secure-openclaw)
+- [OpenClaw vs Claude Code (DataCamp)](https://www.datacamp.com/blog/openclaw-vs-claude-code)
+- [Show HN: Claude Code as Personal Assistant](https://news.ycombinator.com/item?id=47220057)
+- [Harper Reed on Claude Code Mobile](https://harper.blog/2026/01/05/claude-code-is-better-on-your-phone/)
+- [Claude Code Pricing Guide](https://www.ksred.com/claude-code-pricing-guide-which-plan-actually-saves-you-money/)
