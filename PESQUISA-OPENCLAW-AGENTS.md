@@ -256,23 +256,26 @@ Controles disponíveis: `--allowedTools`, `--max-turns`, `--max-budget-usd`, `--
 - **Compliance ~70%** (não é determinístico como hooks)
 - Custom slash commands: `.claude/commands/seu-comando.md`
 
-#### Setup Completo Recomendado (Claude Code + VPS)
+#### Setup Completo Recomendado (Claude Code + VPS) — ATUALIZADO com Channels
 ```
 1. VPS (Hetzner/Vultr) $5-10/mês
 2. Claude Max 5x ou 20x ($100-200/mês)
-3. tmux (sessão persistente)
-4. mosh (conexão resiliente)
-5. Tailscale (rede privada segura)
-6. MCP servers: Google Workspace, Telegram/WhatsApp, Playwright
-7. CLAUDE.md com contexto pessoal + date scripts
-8. Hooks: SessionStart (briefing), Stop (push notifications via ntfy)
-9. Custom commands: /daily-briefing, /check-email, /schedule-meeting
-10. Cron jobs com `claude -p` para tarefas proativas
-11. Termius (iOS/Android) para acesso mobile
+3. Bun runtime (necessário para Channels)
+4. tmux (sessão persistente)
+5. mosh (conexão resiliente)
+6. Tailscale (rede privada segura)
+7. ★ Channels: plugin oficial Telegram/Discord (substitui bots third-party)
+8. MCP servers: Google Workspace, Playwright
+9. CLAUDE.md com contexto pessoal + date scripts
+10. Hooks: SessionStart (briefing), Stop (push notifications via ntfy)
+11. Custom commands: /daily-briefing, /check-email, /schedule-meeting
+12. Cron jobs com `claude -p` para tarefas proativas
+13. Termius (iOS/Android) para SSH direto (backup do Telegram)
 ```
 
-#### Acesso Mobile
-- **Termius** (iOS/Android) — SSH client principal
+#### Acesso Mobile (atualizado)
+- **★ Telegram (via Channels)** — Interface principal, oficial, allowlist segura
+- **Termius** (iOS/Android) — SSH direto (backup/administração)
 - **Tailscale** — rede privada (sem expor VPS à internet)
 - **Mosh** — conexão resiliente (WiFi instável não mata sessão)
 - **ntfy** — push notifications quando Claude precisa de input
@@ -493,7 +496,158 @@ Se positiva, registre no CRM." \
 
 ---
 
-## 7. Segurança da API DeepSeek — Análise Detalhada
+## 7. Claude Code Channels — "OpenClaw Killer" Oficial (20/03/2026)
+
+### O que é
+
+Feature OFICIAL da Anthropic lançada em research preview. Transforma Claude Code num chat bridge bidirecional com **Telegram e Discord** via plugins MCP oficiais. Não é projeto terceiro, não é gambiarra — é built-in.
+
+**Requisitos:** Claude Code v2.1.80+, login claude.ai (não funciona com API key), Bun runtime.
+
+### Como Funciona
+
+```
+┌──────────────┐     MCP polling      ┌──────────────────┐
+│  Telegram /  │◄────────────────────►│  Claude Code     │
+│  Discord     │   (two-way bridge)   │  --channels      │
+│              │                       │  (sessão ativa)  │
+│  Você manda  │──── <channel> event──►│  Claude lê,      │
+│  mensagem    │                       │  executa, e      │
+│              │◄── reply tool ───────│  responde         │
+└──────────────┘                       └──────────────────┘
+```
+
+O plugin faz polling do Telegram/Discord. Quando uma mensagem chega, injeta como `<channel source="telegram">` na sessão ativa. Claude processa e responde via tool call de `reply`.
+
+### Setup Telegram (3 comandos)
+
+```bash
+# 1. Criar bot no BotFather (@BotFather no Telegram → /newbot)
+# Copiar o token
+
+# 2. No Claude Code:
+/plugin install telegram@claude-plugins-official
+/telegram:configure <TOKEN_DO_BOTFATHER>
+
+# 3. Sair e reiniciar com channels:
+claude --channels plugin:telegram@claude-plugins-official
+
+# 4. Mandar qualquer msg pro bot no Telegram → recebe código de pareamento
+/telegram:access pair <CÓDIGO>
+/telegram:access policy allowlist   # só você pode mandar msgs
+```
+
+### Setup Discord (similar)
+
+```bash
+# 1. Discord Developer Portal → New Application → Bot → Reset Token → copiar
+# 2. OAuth2 → bot scope → permissões: View Channels, Send/Read Messages, Attach Files
+# 3. Adicionar bot ao servidor via URL gerada
+
+/plugin install discord@claude-plugins-official
+/discord:configure <TOKEN>
+claude --channels plugin:discord@claude-plugins-official
+
+# Parear via DM ao bot
+/discord:access pair <CÓDIGO>
+/discord:access policy allowlist
+```
+
+### Segurança
+
+- **Allowlist por sender ID** — só IDs pareados podem enviar mensagens, resto é silenciosamente descartado
+- `--channels` é opt-in por sessão — não basta estar no `.mcp.json`
+- **Team/Enterprise:** Desabilitado por padrão, admin precisa habilitar explicitamente
+- Plugin fakechat para testar localmente sem expor nada externo
+
+### O que Channels MATA no Nosso Plano
+
+| Antes (projeto terceiro) | Agora (oficial) |
+|--------------------------|-----------------|
+| [claude-telegram-bot (linuz90)](https://github.com/linuz90/claude-telegram-bot) — bot custom, npm install, .env | `/plugin install telegram` — 3 comandos |
+| [claude-code-telegram (RichardAtCT)](https://github.com/RichardAtCT/claude-code-telegram) — setup complexo | Plugin oficial com pareamento seguro |
+| [mcp-telegram (antongsm)](https://github.com/antongsm/mcp-telegram) — MCP não-oficial | Plugin MCP oficial da Anthropic |
+| Preocupação com segurança de bots third-party | Allowlist nativa, auditada pela Anthropic |
+
+### O que Channels NÃO Substitui (ainda)
+
+- **Cron + `claude -p`** — Channels é **reativo** (você manda msg → Claude responde). Cron é **proativo** (Claude faz algo sozinho no horário). Ambos se complementam
+- **CLAUDE.md** — Continua sendo a memória persistente
+- **MCP servers (Google Workspace, etc.)** — Channels é interface de comunicação, não integração com serviços
+- **tmux** — Channels PRECISA de sessão ativa, tmux garante isso
+- **WhatsApp** — Ainda não tem plugin oficial (só Telegram e Discord no preview)
+- **ntfy** — Channels não faz push notification quando Claude precisa de input em permission prompt
+
+### Limitações Atuais
+
+- **Research preview** — sintaxe do `--channels` pode mudar
+- **Só plugins da allowlist Anthropic** — não aceita plugins custom (use `--dangerously-load-development-channels` para dev)
+- **Permission prompts pausam** — se Claude bater num prompt de permissão, a sessão para até você aprovar localmente (workaround: `--dangerously-skip-permissions` em ambientes confiáveis)
+- **Sem WhatsApp** — Telegram e Discord apenas (por enquanto)
+- **Sessão precisa estar ativa** — se Claude Code morrer, o bot fica mudo
+
+### ★ Setup Atualizado (Com Channels)
+
+O setup recomendado da seção 9 agora fica:
+
+```bash
+# VPS (Hostinger) — Setup completo atualizado
+
+# 1. SSH na VPS
+ssh user@sua-vps-hostinger
+
+# 2. Instalar dependências
+npm install -g @anthropic-ai/claude-code
+curl -fsSL https://bun.sh/install | bash  # Bun (necessário para Channels)
+
+# 3. Login
+claude login
+
+# 4. Instalar plugins de Channels
+/plugin install telegram@claude-plugins-official
+/telegram:configure <TOKEN_BOTFATHER>
+
+# 5. Instalar MCP servers
+claude mcp add google-workspace -- npx @ngs/google-mcp-server
+
+# 6. Criar CLAUDE.md global
+cat > ~/.claude/CLAUDE.md << 'EOF'
+Você é meu assistente pessoal. Contexto:
+- Meu nome: [nome]
+- Fuso: America/Sao_Paulo
+- Idioma: Português BR
+- Responda sempre em português
+EOF
+
+# 7. tmux + Channels (sessão persistente com Telegram)
+tmux new-session -d -s claude 'claude --channels plugin:telegram@claude-plugins-official'
+
+# 8. Cron para tarefas proativas (complementa o Channels reativo)
+crontab -e
+# 0 7 * * * cd ~/workspace && claude -p "Bom dia! Cheque meu email e calendário." --allowedTools "Read" "mcp__google-workspace__*"
+
+# 9. Acessar de qualquer lugar via Telegram
+# Manda msg pro bot → Claude responde
+```
+
+**Diferença do setup antigo:** Antes eram ~11 passos com clone de repo, npm install de bot third-party, configuração manual de .env. Agora são 3 comandos para o Telegram funcionar.
+
+### Impacto na Comparação Claude Code vs OpenClaw
+
+| Dimensão | Claude Code + Channels (NOVO) | OpenClaw |
+|----------|-------------------------------|----------|
+| Interface mobile | **Telegram/Discord OFICIAL** | WhatsApp/Telegram/Slack |
+| Setup Telegram | **3 comandos** | Docker + config + API keys |
+| Segurança | **Allowlist nativa + Anthropic-maintained** | Responsabilidade do usuário |
+| Custo | **R$0 extra** (assinatura Max) | $8-30/mês em API |
+| WhatsApp | Não (ainda) | Sim |
+| Proatividade | Cron (manual) | Heartbeat (built-in) |
+
+**Veredicto atualizado:** Com Channels, a distância entre Claude Code e OpenClaw **diminuiu ainda mais**. O único motivo restante para considerar OpenClaw é WhatsApp nativo e o heartbeat scheduler. Para quem usa Telegram, Claude Code + Channels é objetivamente superior.
+
+---
+
+## 8. Segurança da API DeepSeek — Análise Detalhada
 
 ### RISCOS CONFIRMADOS
 
@@ -590,7 +744,7 @@ Se positiva, registre no CRM." \
 
 ---
 
-## 8. Caso de Uso "Jarvis para Leigos" — Recomendação Final
+## 9. Caso de Uso "Jarvis para Leigos" — Recomendação Final
 
 ### Stack Recomendado (Seguro + Barato)
 
@@ -636,7 +790,7 @@ VPS (Hetzner $5/mês)
 
 ---
 
-## 9. Implementação Pessoal: 3 Abordagens Avaliadas
+## 10. Implementação Pessoal: 3 Abordagens Avaliadas
 
 ### Contexto
 Usuário já paga Claude Max ($100-200/mês), já tem VPS na Hostinger, quer assistente pessoal tipo OpenClaw mas usando a assinatura Claude.
@@ -664,38 +818,37 @@ Usuário já paga Claude Max ($100-200/mês), já tem VPS na Hostinger, quer ass
 
 **Veredicto:** Bom como **canal secundário** para sessões complexas e longas (pesquisa, planejamento). Não serve como assistente proativo.
 
-### Abordagem B: VPS (Hostinger) + Claude Code CLI + Interface Web/Telegram ★ RECOMENDADA
+### Abordagem B: VPS (Hostinger) + Claude Code CLI + Channels (Telegram/Discord) ★ RECOMENDADA
+
+> **ATUALIZAÇÃO 20/03/2026:** A Anthropic lançou **Claude Code Channels** (research preview) — integração OFICIAL com Telegram e Discord. Isso simplifica drasticamente esta abordagem. Ver seção 7 para detalhes completos.
 
 **Como funciona:**
 - Claude Code instalado na VPS via `claude login` (usa assinatura Max)
 - tmux mantém sessão persistente
+- **Channels (NOVO):** Plugin oficial de Telegram/Discord — 3 comandos para setup
 - Crontab + `claude -p` para tarefas proativas (briefing, email check)
-- Interface via uma das opções:
-  - **[claude-telegram-bot](https://github.com/linuz90/claude-telegram-bot)** — bot Telegram bonito, usa assinatura, botões interativos ★ MAIS RÁPIDO
-  - **[Codeman](https://github.com/Ark0N/Codeman)** — WebUI para gerenciar sessões tmux
-  - **Interface web custom** — mais trabalho, mas 100% personalizada
-- MCP servers para Google Workspace, WhatsApp, etc.
+- MCP servers para Google Workspace, etc.
 - Tailscale para rede privada segura
-- ntfy para push notifications
+- ntfy para push notifications (quando Claude bate em permission prompt)
 
-**Setup na Hostinger (passo a passo conceitual):**
+**Setup na Hostinger (passo a passo conceitual — ATUALIZADO com Channels):**
 ```bash
 # 1. SSH na VPS
 ssh user@sua-vps-hostinger
 
-# 2. Instalar Claude Code
+# 2. Instalar Claude Code + Bun (necessário para Channels)
 npm install -g @anthropic-ai/claude-code
+curl -fsSL https://bun.sh/install | bash
 
 # 3. Login (usa assinatura Max)
 claude login
 
-# 4. Instalar tmux + configurar
-apt install tmux
-tmux new-session -d -s claude
+# 4. Instalar plugin oficial de Telegram (NOVO — substitui bots third-party)
+/plugin install telegram@claude-plugins-official
+/telegram:configure <TOKEN_DO_BOTFATHER>
 
 # 5. Configurar MCP servers
 claude mcp add google-workspace -- npx @ngs/google-mcp-server
-claude mcp add telegram -- npx @antongsm/mcp-telegram
 
 # 6. Criar CLAUDE.md global
 cat > ~/.claude/CLAUDE.md << 'EOF'
@@ -707,35 +860,40 @@ Você é meu assistente pessoal. Contexto:
 - Prioridades: [suas prioridades]
 EOF
 
-# 7. Setup cron para briefing matinal
-crontab -e
-# 0 7 * * * cd ~/workspace && claude -p "Bom dia! Cheque meu email e calendário, me dê um resumo do dia." --allowedTools "Read" "mcp__google-workspace" > /tmp/briefing.txt && ntfy publish meu-canal "Briefing pronto"
+# 7. tmux + Channels (sessão persistente COM Telegram)
+tmux new-session -d -s claude 'claude --channels plugin:telegram@claude-plugins-official'
 
-# 8. Setup Telegram bot (opção mais rápida para interface bonita)
-git clone https://github.com/linuz90/claude-telegram-bot
-cd claude-telegram-bot && npm install
-# Configurar .env com token do BotFather
-npm start
+# 8. Parear conta no Telegram (uma vez)
+# Mandar qualquer msg pro bot → recebe código
+/telegram:access pair <CÓDIGO>
+/telegram:access policy allowlist
+
+# 9. Setup cron para briefing matinal (proativo — complementa o Channels reativo)
+crontab -e
+# 0 7 * * * cd ~/workspace && claude -p "Bom dia! Cheque meu email e calendário." --allowedTools "Read" "mcp__google-workspace__*" > /tmp/briefing.txt && ntfy publish meu-canal "Briefing pronto"
 ```
 
 **Prós:**
+- ★ **Telegram OFICIAL** — 3 comandos, não mais clone de repo/npm install/configurar .env
+- ★ **Allowlist de segurança nativa** — só seu sender ID pode interagir
 - ★ Cron nativo — proatividade real
 - ★ Sempre disponível — VPS não dorme
-- ★ Acesso mobile bonito via Telegram
 - ★ Usa assinatura Max (sem custo de API)
 - ★ VPS já paga (custo extra = zero)
-- Push notifications via ntfy
+- ★ Discord de brinde (antes não tínhamos)
 - Sessão persiste via tmux
 
 **Contras:**
-- Setup inicial leva algumas horas
+- Channels é research preview (pode mudar)
+- Permission prompts pausam sessão até aprovar localmente
 - `claude login` pode expirar (precisa renovar periodicamente)
 - Rate limits da assinatura Max se aplicam
-- VPS da Hostinger precisa ter RAM suficiente (Claude Code CLI consome ~200-500MB)
+- WhatsApp ainda não tem plugin oficial (só Telegram/Discord)
+- VPS da Hostinger precisa ter RAM suficiente (~200-500MB)
 
 **Custo extra: R$0** (já tem VPS + Max)
 
-**Veredicto:** Melhor relação custo-benefício-esforço. A VPS já existe, a assinatura já existe, o bot Telegram já existe como projeto open source. É só montar.
+**Veredicto:** Com Channels, esta abordagem ficou **ainda melhor**. O setup caiu de ~11 passos para ~9 (e os passos são mais simples). A segurança melhorou (allowlist oficial). E não depende mais de projetos third-party para Telegram.
 
 ### Abordagem C: Notebook Local + Remote Control + Scheduled Tasks
 
@@ -822,6 +980,10 @@ npm start
 
 ## Fontes
 
+- [Claude Code Channels — Documentação Oficial](https://code.claude.com/docs/en/channels)
+- [VentureBeat: Anthropic shipped an OpenClaw killer called Claude Code Channels](https://venturebeat.com/orchestration/anthropic-just-shipped-an-openclaw-killer-called-claude-code-channels)
+- [Claude Plugins Official (GitHub)](https://github.com/anthropics/claude-plugins-official/tree/main/external_plugins)
+- [Hacker News: Claude Code Channels](https://news.ycombinator.com/item?id=47448524)
 - [Best Local LLMs for RTX 40 Series](https://apxml.com/posts/best-local-llm-rtx-40-gpu)
 - [Ollama VRAM Requirements Guide](https://localllm.in/blog/ollama-vram-requirements-for-local-llms)
 - [Optimizing Local LLMs for 8GB GPU](https://www.sitepoint.com/optimizing-local-llms-low-end-hardware-8gb/)
