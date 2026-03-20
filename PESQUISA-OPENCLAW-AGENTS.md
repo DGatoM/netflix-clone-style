@@ -246,25 +246,42 @@ Claude Code + VPS é viável como assistente pessoal **para uso moderado** (não
 ### RISCOS CONFIRMADOS
 
 #### Armazenamento na China
-- Dados armazenados em servidores na China
+- Dados armazenados em servidores na China — sem opção de região alternativa
 - Sujeito à Lei de Segurança de Dados (2021) e Lei de Inteligência Nacional (2017)
 - Governo chinês pode legalmente exigir acesso aos dados sem notificar usuários
+- **Sem prazo de retenção definido** — "as long as necessary"
+- **Treina nos seus dados — SEM opção de opt-out** (diferente de OpenAI/Anthropic)
+- Deletar chats NÃO garante remoção dos dados de treinamento
 
-#### Falhas de Segurança Documentadas
-- **CVE-2026-25253 (CVSS 8.8):** Cross-site WebSocket hijacking
-- **Banco de dados exposto (Wiz):** 1M+ registros sensíveis (histórico de chat, API keys, logs)
-- **Chaves de criptografia hardcoded** (NowSecure) — erro fundamental
-- **Código oculto (Feroot Security):** Transmissão de dados para CMPassport.com (China Mobile)
-- Dados transmitidos sem criptografia em alguns casos
-- Taxa de jailbreak: 100% de sucesso em testes
+#### Coleta de Dados Extensiva
+- Chat history e prompts
+- Keystroke patterns/ritmos (biometria comportamental)
+- Device identifiers, IP, carrier móvel
+- Cookies, analytics de uso
+- Arquivos uploadados
+
+#### Falhas de Segurança Documentadas (Timeline)
+- **Jan/2025 — Banco de dados exposto (Wiz):** 1M+ registros em ClickHouse público, sem autenticação (chat histories, API keys, tokens, logs internos)
+- **Jan/2025 — DDoS massivo:** Forçou suspensão de novos cadastros
+- **Fev/2025 — App iOS (NowSecure):** Dados transmitidos sem criptografia, chaves hardcoded
+- **Fev/2025 — Código oculto (Feroot Security):** Transmissão para CMPassport.com (China Mobile, estatal)
+- **Mar/2025 — Dados de treinamento vazados:** ~12.000 API keys e senhas reais encontradas nos dados de treino
+- **CVE-2026-25253 (CVSS 8.8):** Cross-site WebSocket hijacking (patcheado)
+- **Jailbreak (Cisco/Qualys):** 100% de sucesso — falhou em bloquear TODOS os prompts maliciosos
+- **Pacotes falsos PyPI:** "deepseek" e "deepseekai" publicados para roubar credenciais
+- **DeepSeek NÃO emitiu NENHUMA resposta pública** sobre qualquer incidente
 
 #### Banimentos Governamentais
-- **Itália:** Banido em 72 horas
-- **Austrália:** Banido de todos dispositivos governamentais
+- **Itália:** Banido em 72 horas (jan/2025)
+- **Austrália:** Banido de todos dispositivos governamentais (fev/2025)
+- **EUA:** Banido pelo Pentágono, NASA, US Navy, Congresso, múltiplos estados
+- **Taiwan:** Proibido em todo setor público e infraestrutura crítica
+- **Coreia do Sul:** Ban temporário governamental
 - **República Tcheca:** Banido da administração pública
 - **Alemanha:** Pediu remoção das app stores
+- **2026:** EU, Canadá, Coreia, Austrália, Índia emitiram restrições formais
 - **13 jurisdições europeias** investigando
-- **7+ países** e dezenas de agências dos EUA baniram
+- EDPB criou Task Force de Enforcement de IA por causa do DeepSeek
 
 ### API vs App vs Local
 
@@ -277,23 +294,40 @@ Claude Code + VPS é viável como assistente pessoal **para uso moderado** (não
 
 *Rodar localmente elimina o envio de dados, mas as vulnerabilidades do modelo em si (jailbreak, censura embutida) permanecem.
 
+### Comparação DeepSeek vs Providers Ocidentais
+
+| Feature | DeepSeek | OpenAI | Anthropic |
+|---------|----------|--------|-----------|
+| Dados armazenados em | **China** | US/EU (GDPR) | US |
+| Treina nos dados da API? | **Sim, sem opt-out** | Opt-out disponível | **Nunca** (por padrão) |
+| Retenção | Indefinida | 30 dias (temp chats) | ~30 dias (abuse) |
+| Garantia zero-training enterprise | Não | Sim | Sim |
+| Risco governo | **Alto** (lei chinesa) | Moderado (CLOUD Act) | Moderado (CLOUD Act) |
+| Resposta a incidentes | **Nenhuma** | Alta | Alta |
+| Auditorias terceiros | Nenhuma | SOC 2 | SOC 2 |
+
 ### ALTERNATIVAS SEGURAS E BARATAS
 
 | Provider | Preço/M tokens (in/out) | Privacidade | Compliance |
 |----------|------------------------|-------------|------------|
-| **Groq** (Llama 3) | $0.05-0.10 | USA, boa | Em andamento |
+| **Groq** (Llama 3/R1) | $0.05-0.99 | USA, boa | Em andamento |
 | **Together.ai** (Llama 4) | $0.05-0.90 | USA, boa | SOC2 |
 | **Fireworks.ai** | $0.10-3.00 | USA, excelente | **HIPAA + SOC2 Type II** |
 | **Gemini Flash-Lite** | $0.075/0.30 | USA (Google) | Enterprise |
 | **Mistral (via API)** | $0.02+ | **Europa (França)** | GDPR nativo |
+| **Lumo (Proton)** | Variável | **Suíça** | Zero-access encryption |
 | DeepSeek V3.2 | $0.28/0.42 | **China** | Nenhum |
 
+**Nota:** Groq hospeda DeepSeek R1 em servidores US a $0.75/$0.99 por M tokens — mesmo modelo, dados nunca vão pra China.
+
 ### Recomendação para Quem Tem Medo da China
-1. **Melhor opção:** Rodar DeepSeek **localmente** via Ollama (dados nunca saem do PC)
+1. **Melhor opção:** Rodar DeepSeek **localmente** via Ollama — `ollama run deepseek-r1:8b` (dados nunca saem do PC)
 2. **API barata + segura:** Groq ou Together.ai com Llama 4 Scout ($0.05-0.27/M tokens)
-3. **Máxima privacidade + barato:** Mistral via API (servidores na Europa, GDPR)
-4. **Compliance enterprise:** Fireworks.ai (HIPAA + SOC2)
-5. **Hosted DeepSeek sem China:** Perplexity hospeda DeepSeek R1 em servidores US/EU
+3. **DeepSeek R1 sem China:** Groq hospeda R1 em servidores US ($0.75-0.99/M)
+4. **Máxima privacidade + barato:** Mistral via API (servidores na França, GDPR nativo)
+5. **Privacidade máxima (Europa):** Lumo by Proton (Suíça, zero-access encryption)
+6. **Compliance enterprise:** Fireworks.ai (HIPAA + SOC2)
+7. **Hosted DeepSeek sem China:** Perplexity hospeda DeepSeek R1 em servidores US/EU
 
 ### NUNCA usar a API DeepSeek direta para:
 - Dados pessoais de clientes
@@ -368,3 +402,15 @@ VPS (Hetzner $5/mês)
 - [LLM API Pricing March 2026](https://www.tldl.io/resources/llm-api-pricing-2026)
 - [DeepSeek Alternatives That Are Safe](https://brightseotools.com/post/DeepSeek-Alternatives)
 - [Cheap LLM API Providers 2026](https://www.siliconflow.com/articles/en/the-cheapest-LLM-API-provider)
+- [IAPP - DeepSeek and the China Data Question](https://iapp.org/news/a/deepseek-and-the-china-data-question-direct-collection-open-source-and-the-limits-of-extraterritorial-enforcement)
+- [Wiz Research - Exposed DeepSeek Database](https://www.wiz.io/blog/wiz-research-uncovers-exposed-deepseek-database-leak)
+- [DeepSeek Privacy Policy (Feb 2025)](https://cdn.deepseek.com/policies/en-US/deepseek-privacy-policy-2025-02-14.html)
+- [Theori - DeepSeek Security, Privacy, and Governance](https://theori.io/blog/deepseek-security-privacy-and-governance-hidden-risks-in-open-source-ai)
+- [Qualys - DeepSeek Jailbreak Vulnerability](https://blog.qualys.com/vulnerabilities-threat-research/2025/01/31/deepseek-failed-over-half-of-the-jailbreak-tests-by-qualys-totalai)
+- [Countries That Banned DeepSeek (Al Jazeera)](https://www.aljazeera.com/news/2025/2/6/which-countries-have-banned-deepseek-and-why)
+- [Groq Pricing](https://groq.com/pricing)
+- [Lumo by Proton - Privacy AI](https://captaincompliance.com/education/ai-platforms-for-2025-privacy-rankings/)
+- [Best Local LLM Models 2026 - SitePoint](https://www.sitepoint.com/best-local-llm-models-2026/)
+- [Best GPUs for Local LLM Inference 2026](https://corelab.tech/llmgpu/)
+- [Used RTX 3090 Best Value for Local AI](https://www.xda-developers.com/used-rtx-3090-still-best-for-local-ai-in-value/)
+- [eGPU Connection Speed Impact on LLM Inference](https://egpu.io/forums/pro-applications/impact-of-egpu-connection-speed-on-local-llm-inference-in-multi-egpu-setups/)
